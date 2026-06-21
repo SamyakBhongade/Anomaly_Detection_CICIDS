@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Cognitive IDS — Live Anomaly Detection</title>
+    <meta name="description" content="Real-time network traffic anomaly detection dashboard powered by a 4-model deep learning ensemble.">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="dashboard" id="dashboard">
+
+        <!-- ── Header ──────────────────────────────────────────────── -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 id="main-title"><i class="fas fa-shield-alt"></i> Anomaly Detection IDS — Live Monitor</h1>
+                    <span class="header-subtitle">4-Model Ensemble · BiLSTM · CNN · Transformer · VAE</span>
+                </div>
+                <div class="status-indicators">
+                    <div class="status-row">
+                        <div class="status-item">
+                            <i class="fas fa-brain"></i>
+                            <span>ML Engine</span>
+                            <div class="status-dot" id="ml-dot"></div>
+                        </div>
+                        <div class="status-item">
+                            <i class="fas fa-database"></i>
+                            <span>Database</span>
+                            <div class="status-dot" id="db-dot"></div>
+                        </div>
+                        <div class="status-item">
+                            <i class="fas fa-wifi"></i>
+                            <span>Live Feed</span>
+                            <div class="status-dot" id="sse-dot"></div>
+                        </div>
+                    </div>
+                    <div class="live-status" id="live-status">
+                        Connecting...
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ── Main Content ────────────────────────────────────────── -->
+        <main class="main-content">
+
+            <!-- Stat Cards -->
+            <section class="stats-grid" id="stats-section">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-globe"></i></div>
+                    <div class="stat-content">
+                        <h3 id="stat-total">0</h3>
+                        <p>Total Analyzed</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon critical"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-content">
+                        <h3 id="stat-attacks">0</h3>
+                        <p>Attacks Detected</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-content">
+                        <h3 id="stat-benign">0</h3>
+                        <p>Benign Traffic</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon warning"><i class="fas fa-fire"></i></div>
+                    <div class="stat-content">
+                        <h3 id="stat-attack-rate">0%</h3>
+                        <p>Attack Rate</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon info"><i class="fas fa-bullseye"></i></div>
+                    <div class="stat-content">
+                        <h3 id="stat-avg-conf">0%</h3>
+                        <p>Avg Attack Confidence</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Row -->
+            <section class="charts-section" id="charts-section">
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-line"></i> Detection Timeline</h3>
+                    <canvas id="timelineChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-pie"></i> Attack Type Distribution</h3>
+                    <canvas id="attackTypeChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Model Scores + Threat Feed Row -->
+            <section class="bottom-section" id="bottom-section">
+
+                <!-- Live Threat Feed -->
+                <div class="threats-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-stream"></i> Live Threat Feed</h3>
+                        <div class="feed-controls">
+                            <button class="btn-refresh" id="btn-refresh" onclick="window.ids.refresh()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button class="btn-reset" id="btn-reset" onclick="window.ids.resetData()">
+                                <i class="fas fa-trash-alt"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="threats-feed" id="threats-feed">
+                        <div class="no-threats">
+                            <i class="fas fa-satellite-dish"></i>
+                            <p>Waiting for traffic data...<br><small>Send traffic via <code>send_traffic.py</code> or POST to <code>/api/detect</code></small></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- IP Analyzer & Firewall -->
+            <section class="analyzer-section" id="analyzer-section" style="margin-top: 30px;">
+                <div class="section-header">
+                    <h3><i class="fas fa-search-location"></i> IP Analyzer & Firewall</h3>
+                    <div class="feed-controls" style="display: flex; gap: 10px;">
+                        <input type="text" id="ip-search-input" placeholder="Enter IP address..." class="ip-input" />
+                        <button class="btn-refresh" onclick="window.ids.analyzeIpFromInput()">
+                            <i class="fas fa-search"></i> Analyze
+                        </button>
+                    </div>
+                </div>
+                <div class="analyzer-content" id="analyzer-content">
+                    <div class="no-threats">
+                        <i class="fas fa-fingerprint"></i>
+                        <p>No IP selected.<br><small>Type an IP above or click one in the Threat Feed to begin analysis.</small></p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ── Alert Popup ─────────────────────────────────────────── -->
+    <div class="overlay" id="overlay" onclick="window.ids.closeAlert()"></div>
+    <div class="alert-popup" id="alert-popup">
+        <div class="alert-header">
+            <div class="alert-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="alert-title">🚨 ATTACK DETECTED</div>
+        </div>
+        <div class="alert-details" id="alert-details"></div>
+        <button class="alert-close" id="alert-close" onclick="window.ids.closeAlert()">ACKNOWLEDGE</button>
+    </div>
+
+    <script src="/static/dashboard.js"></script>
+</body>
+</html>
