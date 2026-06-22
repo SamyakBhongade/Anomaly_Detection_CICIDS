@@ -9,9 +9,6 @@ class CognitiveIDS {
         this.stats = { total: 0, attacks: 0, benign: 0, attack_rate: 0, avg_attack_conf: 0 };
         this.attackTypes = {};
         this.knownAlertIds = new Set();
-        this.timelineData = { benign: [], attacks: [] };
-        this.timelineLabels = [];
-        this.currentGraphDate = new Date().toDateString();
         this.sseConnected = false;
         this.eventSource = null;
         this.lastFeedHtml = '';
@@ -157,11 +154,6 @@ class CognitiveIDS {
             // Calculate actual traffic volume delta since last update
             let newBenign = this.stats.benign - prevBenign;
             let newAttacks = this.stats.attacks - prevAttacks;
-
-            // Only push a point if there's new traffic
-            if (newBenign > 0 || newAttacks > 0) {
-                this.pushTimelinePoint(newBenign, newAttacks);
-            }
         }
 
         // Handle new attack alerts from SSE
@@ -173,7 +165,7 @@ class CognitiveIDS {
                     newAlertsFound = true;
 
                     // Show popup for high-confidence attacks
-                    if (alert.confidence >= 0.8) {
+                    if (alert.label === 1 && alert.confidence >= 0.8) {
                         this.showAlert(alert);
                     }
                 }
@@ -245,82 +237,6 @@ class CognitiveIDS {
 
     // ── Charts ────────────────────────────────────────────────
     initCharts() {
-        // Timeline chart
-        const tlCtx = document.getElementById('timelineChart');
-        if (!tlCtx) return;
-
-        this.timelineChart = new Chart(tlCtx.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: this.timelineLabels,
-                datasets: [
-                    {
-                        label: 'Attacks',
-                        data: this.timelineData.attacks,
-                        borderColor: '#ff4757',
-                        backgroundColor: 'rgba(255, 71, 87, 0.2)', // Visible transparent fill
-                        fill: true,
-                        tension: 0.45, // Smooth curves
-                        borderWidth: 3, // Bold line
-                        pointRadius: 4, // Visible points
-                        pointBackgroundColor: '#0f0f23', // Matches dashboard background
-                        pointBorderColor: '#ff4757',
-                        pointBorderWidth: 2,
-                        pointHoverRadius: 6,
-                    },
-                    {
-                        label: 'Benign',
-                        data: this.timelineData.benign,
-                        borderColor: '#00d4ff', // Switched to cyan for a cooler tech vibe
-                        backgroundColor: 'rgba(0, 212, 255, 0.1)',
-                        fill: true,
-                        tension: 0.45,
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#0f0f23',
-                        pointBorderColor: '#00d4ff',
-                        pointBorderWidth: 2,
-                        pointHoverRadius: 6,
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                animation: {
-                    duration: 400,
-                    easing: 'easeOutQuart'
-                },
-                interaction: { mode: 'index', intersect: false },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: '#8892a4', font: { size: 10 }, stepSize: 1 },
-                        grid: { color: 'rgba(255,255,255,0.06)', borderDash: [4, 4] }, // Dashed subtle grid
-                    },
-                    x: {
-                        ticks: { color: '#8892a4', font: { size: 9 }, maxTicksLimit: 12 },
-                        grid: { display: false },
-                    }
-                },
-                plugins: {
-                    legend: {
-                        labels: { color: '#ffffff', font: { size: 12, weight: '600' }, usePointStyle: true, pointStyleWidth: 14 }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(15, 15, 35, 0.95)',
-                        titleColor: '#ffffff',
-                        bodyColor: '#ffffff',
-                        borderColor: 'rgba(255, 255, 255, 0.1)',
-                        borderWidth: 1,
-                        padding: 12,
-                        boxPadding: 6,
-                        usePointStyle: true,
-                    }
-                }
-            }
-        });
-
         // Attack type doughnut chart
         const atCtx = document.getElementById('attackTypeChart');
         if (!atCtx) return;
@@ -356,31 +272,6 @@ class CognitiveIDS {
                 }
             }
         });
-    }
-
-    pushTimelinePoint(benignCount, attackCount) {
-        const today = new Date().toDateString();
-        
-        // Reset graph if it's a new day
-        if (this.currentGraphDate !== today) {
-            this.timelineData.benign = [];
-            this.timelineData.attacks = [];
-            this.timelineLabels = [];
-            this.currentGraphDate = today;
-        }
-
-        this.timelineData.benign.push(benignCount);
-        this.timelineData.attacks.push(attackCount);
-
-        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        this.timelineLabels.push(now);
-
-        if (this.timelineChart) {
-            this.timelineChart.data.labels = [...this.timelineLabels];
-            this.timelineChart.data.datasets[0].data = [...this.timelineData.attacks];
-            this.timelineChart.data.datasets[1].data = [...this.timelineData.benign];
-            this.timelineChart.update('none'); // Use 'none' to avoid flashing on every point
-        }
     }
 
     updateAttackTypeChart() {
@@ -475,8 +366,6 @@ class CognitiveIDS {
             console.log('🗑️ Database reset');
             this.knownAlertIds.clear();
             this.attackTypes = {};
-            this.timelineData = { benign: [], attacks: [] };
-            this.timelineLabels = [];
             await this.loadInitialData();
             document.getElementById('analyzer-content').innerHTML = `
                 <div class="no-threats">

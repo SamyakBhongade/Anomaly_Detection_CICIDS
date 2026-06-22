@@ -89,19 +89,6 @@
 
             <!-- Charts Row -->
             <section class="charts-section" id="charts-section">
-                <div class="chart-container">
-                    <h3><i class="fas fa-chart-line"></i> Detection Timeline</h3>
-                    <canvas id="timelineChart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3><i class="fas fa-chart-pie"></i> Attack Type Distribution</h3>
-                    <canvas id="attackTypeChart"></canvas>
-                </div>
-            </section>
-
-            <!-- Model Scores + Threat Feed Row -->
-            <section class="bottom-section" id="bottom-section">
-
                 <!-- Live Threat Feed -->
                 <div class="threats-section">
                     <div class="section-header">
@@ -121,6 +108,10 @@
                             <p>Waiting for traffic data...<br><small>Send traffic via <code>send_traffic.py</code> or POST to <code>/api/detect</code></small></p>
                         </div>
                     </div>
+                </div>
+                <div class="chart-container">
+                    <h3><i class="fas fa-chart-pie"></i> Attack Type Distribution</h3>
+                    <canvas id="attackTypeChart"></canvas>
                 </div>
             </section>
 

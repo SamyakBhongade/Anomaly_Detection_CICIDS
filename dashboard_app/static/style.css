@@ -311,6 +311,30 @@ body {
     background: rgba(255, 71, 87, 0.25);
 }
 
+.ip-input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 0.35rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    outline: none;
+    transition: all 0.2s ease;
+    width: 200px;
+}
+
+.ip-input::placeholder {
+    color: var(--text-dim);
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.ip-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    background: rgba(0, 0, 0, 0.4);
+}
+
 /* ── Threat Feed Items ──────────────────────────────────────── */
 .threats-feed {
     max-height: 330px;

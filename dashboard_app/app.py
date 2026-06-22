@@ -18,7 +18,7 @@ sys.path.insert(0, PROJECT_ROOT)
 sys.path.insert(0, os.path.join(PROJECT_ROOT, 'src'))
 
 from db import (get_stats, get_recent_feed, get_latest_id,
-                get_new_attacks_since, reset_db, init_db, insert_batch,
+                get_new_events_since, reset_db, init_db, insert_batch,
                 get_ip_history, block_ip, is_ip_blocked)
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -203,7 +203,7 @@ def api_stream():
         while True:
             time.sleep(1)
             stats  = get_stats()
-            alerts = get_new_attacks_since(last_id)
+            alerts = get_new_events_since(last_id)
             if alerts:
                 last_id = alerts[-1]['id']
             yield f"data: {json.dumps({'stats': stats, 'alerts': alerts})}\n\n"

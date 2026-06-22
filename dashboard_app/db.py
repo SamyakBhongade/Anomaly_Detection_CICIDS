@@ -170,13 +170,13 @@ def get_ip_history(ip_address: str, limit: int = 50) -> list:
     conn.close()
     return [dict(r) for r in rows]
 
-def get_new_attacks_since(last_id: int) -> list:
-    """Return attack events inserted after last_id (for SSE alerts)."""
+def get_new_events_since(last_id: int) -> list:
+    """Return all events inserted after last_id (for SSE alerts)."""
     conn = get_connection()
     rows = conn.execute("""
-        SELECT id, timestamp, ip_address, attack_type, confidence
+        SELECT id, timestamp, ip_address, label, attack_type, confidence
         FROM detections
-        WHERE id > ? AND label = 1
+        WHERE id > ?
         ORDER BY id ASC
     """, (last_id,)).fetchall()
     conn.close()
